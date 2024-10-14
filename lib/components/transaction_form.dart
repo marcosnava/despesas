@@ -1,8 +1,9 @@
 // components/transaction_form.dart
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
-  final void Function(String, double) onSubmit;
+  final void Function(String, double, DateTime) onSubmit;
 
   TransactionForm(
     this.onSubmit, {
@@ -15,8 +16,8 @@ class TransactionForm extends StatefulWidget {
 
 class _TransactionFormState extends State<TransactionForm> {
   final titleController = TextEditingController();
-
   final valueController = TextEditingController();
+  DateTime? _selectedDate;
 
   _submitForm() {
     final title = titleController.text;
@@ -26,7 +27,24 @@ class _TransactionFormState extends State<TransactionForm> {
       return;
     }
 
-    widget.onSubmit(title, value);
+    widget.onSubmit(title, value, _selectedDate!);
+  }
+
+  _showDatePicker() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    ).then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      }
+
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    });
   }
 
   @override
@@ -52,6 +70,27 @@ class _TransactionFormState extends State<TransactionForm> {
               onSubmitted: (_) => _submitForm(),
               decoration: InputDecoration(
                 labelText: 'Valor (R\$)',
+              ),
+            ),
+            SizedBox(
+              height: 70,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(_selectedDate == null
+                        ? 'Nenhuma data selecionada!'
+                        : 'Data Selecionada: ${DateFormat('dd/MM/y').format(_selectedDate!)}'),
+                  ),
+                  TextButton(
+                    child: const Text(
+                      'Selecionar Data',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: _showDatePicker,
+                  )
+                ],
               ),
             ),
             Row(
